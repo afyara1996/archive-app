@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>دليل الأقسام والأرشيف</title>
+
+  <!-- خط Cairo & Tajawal من Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet" />
+
+  <!-- مكتبة Telegram Web App الرسمية -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    :root {
+      --tile-bg: linear-gradient(145deg, rgba(112, 134, 194, 0.94), rgba(78, 97, 150, 0.94));
+      --tile-bg-hover: linear-gradient(145deg, rgba(128, 151, 214, 0.98), rgba(92, 113, 170, 0.98));
+      --tile-text: #0f172a;
+      --footer-bg: rgba(15, 23, 36, 0.88);
+      --footer-text: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Cairo', 'Tajawal', sans-serif;
+      background-color: #03050c;
+      color: #ffffff;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+      padding-bottom: 70px;
+    }
+
+    /* خلفية المجرة والنجوم والشهب المتحركة */
+    #stars-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 20%, #0d1530 0%, #060919 55%, #020308 100%);
+    }
+
+    /* هالة ضوئية ناعمة خلف العمود لإبراز المربعات بأناقة */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 15%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 280px;
+      height: 70vh;
+      background: radial-gradient(circle, rgba(99, 125, 205, 0.14) 0%, rgba(139, 92, 246, 0.06) 45%, transparent 75%);
+      filter: blur(35px);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* أزرار التحكم العلوية (تبديل الخلفية وتبديل ترتيب الأزرار) */
+    .bg-style-btn,
+    .layout-style-btn {
+      position: fixed;
+      top: 14px;
+      z-index: 15;
+      background: rgba(15, 23, 42, 0.68);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #f8fafc;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .bg-style-btn {
+      left: 14px;
+    }
+
+    .layout-style-btn {
+      right: 14px;
+    }
+
+    .bg-style-btn:active,
+    .layout-style-btn:active {
+      transform: scale(0.92);
+    }
+
+    /* المحتوى الرئيسي فوق الخلفية */
+    .main-wrapper {
+      position: relative;
+      z-index: 1;
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ترحيب وحقل بحث وشريط فلترة اختياري */
+    .top-bar {
+      width: 100%;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .greeting-text {
+      font-size: 0.95rem;
+      color: #cbd5e1;
+      margin-bottom: 10px;
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8);
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto 12px;
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(23, 33, 43, 0.75);
+      color: #ffffff;
+      font-family: inherit;
+      font-size: 0.84rem;
+      text-align: center;
+      outline: none;
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s;
+    }
+
+    .search-input::placeholder {
+      color: #94a3b8;
+    }
+
+    .search-input:focus {
+      border-color: #93a8df;
+    }
+
+    /* شريط التصنيفات السريع */
+    .filter-chips {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .chip {
+      background: rgba(97, 116, 166, 0.28);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      color: #e2e8f0;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s ease;
+    }
+
+    .chip.active {
+      background: var(--tile-bg);
+      color: #ffffff;
+      border-color: #93a8df;
+      box-shadow: 0 0 12px rgba(97, 116, 166, 0.6);
+    }
+
+    /* 1. الترتيب الكلاسيكي: عمود واحد في المنتصف */
+    .sections-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      padding-top: 28px;
+    }
+
+    /* 2. الترتيب الشبكي المزدوج (زر رئيسي بارز في الأعلى + زرّان في كل صف) */
+    .sections-column.layout-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 136px);
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .sections-column.layout-grid-2 .section-tile {
+      width: 136px;
+      min-height: 122px;
+    }
+
+    .sections-column.layout-grid-2 .section-tile:first-child {
+      grid-column: 1 / -1;
+      width: 100%;
+      min-height: 112px;
+      background: linear-gradient(135deg, rgba(124, 148, 216, 0.96), rgba(86, 107, 172, 0.96));
+    }
+
+    /* 3. الترتيب المتعرج الأنيق (يمين - يسار بالتناوب) */
+    .sections-column.layout-zigzag {
+      gap: 16px;
+      max-width: 290px;
+    }
+
+    .sections-column.layout-zigzag .section-tile:nth-child(odd) {
+      align-self: flex-end;
+    }
+
+    .sections-column.layout-zigzag .section-tile:nth-child(even) {
+      align-self: flex-start;
+    }
+
+    /* 4. ترتيب البطاقات العريضة الفاخرة (أيقونة يمين + نص وسط + سهم يسار) */
+    .sections-column.layout-cards {
+      gap: 12px;
+      max-width: 340px;
+    }
+
+    .sections-column.layout-cards .section-tile,
+    .sections-column.layout-hybrid .section-tile.wide-card-tile {
+      width: 100%;
+      min-height: 74px;
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 12px 18px;
+      gap: 14px;
+      border-radius: 18px;
+    }
+
+    .sections-column.layout-cards .book-icon,
+    .sections-column.layout-hybrid .section-tile.wide-card-tile .book-icon {
+      width: 48px;
+      height: 38px;
+      margin-bottom: 0;
+      flex-shrink: 0;
+    }
+
+    .sections-column.layout-cards .tile-text-wrap,
+    .sections-column.layout-hybrid .section-tile.wide-card-tile .tile-text-wrap {
+      display: flex;
+      flex-direction: row;
+      align-items: baseline;
+      gap: 6px;
+      flex: 1;
+      text-align: right;
+    }
+
+    .sections-column.layout-cards .tile-arrow,
+    .sections-column.layout-hybrid .section-tile.wide-card-tile .tile-arrow {
+      display: inline-flex;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--tile-text);
+      opacity: 0.65;
+    }
+
+    /* 5. الترتيب المدمج الذكي (يجمع الشبكة المزدوجة للأرشيف + البطاقات العريضة للأقسام) */
+    .sections-column.layout-hybrid {
+      display: grid;
+      grid-template-columns: repeat(2, 140px);
+      justify-content: center;
+      gap: 14px;
+    }
+
+    .sections-column.layout-hybrid .section-tile {
+      width: 140px;
+      min-height: 120px;
+    }
+
+    .sections-column.layout-hybrid .section-tile.wide-card-tile {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(120, 144, 210, 0.96), rgba(82, 102, 165, 0.96));
+    }
+
+    .tile-text-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tile-arrow {
+      display: none;
+    }
+
+    /* تصميم المربع (القسم) بلمسة زجاجية فاخرة */
+    .section-tile {
+      width: 128px;
+      min-height: 122px;
+      background: var(--tile-bg);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 10px 12px;
+      text-decoration: none;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      box-shadow:
+        0 10px 25px rgba(0, 0, 0, 0.65),
+        0 0 18px rgba(97, 116, 166, 0.25),
+        inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, box-shadow 0.2s ease;
+      animation: tileFadeIn 0.28s ease forwards;
+    }
+
+    @keyframes tileFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .section-tile:hover {
+      background: var(--tile-bg-hover);
+      box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.75),
+        0 0 24px rgba(129, 154, 224, 0.45),
+        inset 0 1px 2px rgba(255, 255, 255, 0.45);
+      transform: translateY(-2px);
+    }
+
+    .section-tile:active {
+      transform: scale(0.93);
+    }
+
+    /* أيقونة الكتاب المائل ثلاثي الأبعاد */
+    .book-icon {
+      width: 56px;
+      height: 44px;
+      margin-bottom: 6px;
+      filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35));
+    }
+
+    .tile-title {
+      font-size: 1.02rem;
+      font-weight: 800;
+      color: var(--tile-text);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .tile-subtitle {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--tile-text);
+      text-align: center;
+      line-height: 1.15;
+      margin-top: 2px;
+    }
+
+    .empty-msg {
+      color: #94a3b8;
+      font-size: 0.9rem;
+      margin-top: 20px;
+      text-align: center;
+    }
+
+    /* زر الصعود للأعلى العائم (نفس شكل الصورة) */
+    .scroll-top-btn {
+      position: fixed;
+      bottom: 54px;
+      left: 50%;
+      transform: translateX(-20px) scale(0.9);
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background-color: #050507;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .scroll-top-btn.visible {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(-20px) scale(1);
+    }
+
+    .scroll-top-btn:active {
+      transform: translateX(-20px) scale(0.92);
+    }
+
+    /* الشريط السفلي الثابت لمعرف البوت */
+    .bot-footer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      background-color: var(--footer-bg);
+      color: var(--footer-text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+      font-family: sans-serif;
+      letter-spacing: 0.3px;
+      z-index: 10;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- خلفية المجرة والنجوم والشهب -->
+  <canvas id="stars-canvas"></canvas>
+
+  <!-- زر أنيق لتغيير ثيم الخلفية بضغطة واحدة -->
+  <button id="bg-style-btn" class="bg-style-btn" type="button" title="تغيير شكل الخلفية">
+    <span>✨</span>
+    <span id="bg-style-label">المجرة الملكية</span>
+  </button>
+
+  <!-- زر أنيق لتبديل ترتيب الأزرار بين 4 أشكال -->
+  <button id="layout-style-btn" class="layout-style-btn" type="button" title="تغيير ترتيب الأزرار">
+    <span>📐</span>
+    <span id="layout-style-label">شبكة مزدوجة</span>
+  </button>
+
+  <div class="main-wrapper">
+    <div id="top-bar" class="top-bar">
+      <div id="user-greeting" class="greeting-text"></div>
+      <div id="search-box" class="search-box">
+        <input
+          type="search"
+          id="search-input"
+          class="search-input"
+          placeholder="ابحث عن قسم أو أرشيف..."
+          autocomplete="off"
+        />
+      </div>
+      <!-- أزرار فلترة سريعة حسب نوع القسم (الكل، أرشيف، قنوات، مجموعات، بوتات، تواصل) -->
+      <div id="filter-chips" class="filter-chips"></div>
+    </div>
+
+    <!-- عمود الأقسام الرأسي -->
+    <main id="sections-column" class="sections-column"></main>
+  </div>
+
+  <!-- زر الصعود للأعلى مطابق للصورة -->
+  <button id="scroll-top-btn" class="scroll-top-btn" type="button" aria-label="الصعود للأعلى">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+      <path d="M6 5H18" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M12 20V8M12 8L7 13M12 8L17 13" stroke="white" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <!-- الشريط السفلي باسم البوت -->
+  <footer id="bot-footer" class="bot-footer">@b_borx34bot</footer>
+
+  <script>
+    // =========================================================================
+    // 1. إعدادات المدونة والأقسام (عدّل الروابط والأسماء هنا بكل سهولة)
+    // =========================================================================
+    const CONFIG = {
+      botUsername: "@b_borx34bot",
+      botUrl: "https://t.me/b_borx34bot",
+      // الترتيب الافتراضي للأزرار: "hybrid" (دمج الشبكة والبطاقات) | "grid-2" (شبكة مزدوجة) | "cards" (بطاقات عريضة) | "column" (عمود كلاسيكي)
+      defaultLayout: "hybrid",
+      // اجعل showHeaderControls: false إذا أردت إخفاء البحث والفلترة ليظهر العمود فقط مثل الصورة تمامًا
+      showHeaderControls: false,
+      // إذا أردت لاحقًا جلب الأقسام من API أو Firebase ضع الرابط هنا:
+      apiEndpoint: ""
+    };
+
+    /**
+     * قائمة الأقسام:
+     * - خاصية icon تقبل: "folder" (مجلد أرشيف رئيسي) | "book" (كتاب) | "channel" (قناة) | "group" (مجموعة) | "bot" (بوت) | "contact" (تواصل) | "star" (مميز)
+     */
+    const SECTIONS_DATA = [
+      {
+        id: 1,
+        title: "الأرشيف",
+        numberOrSub: "العام",
+        category: "أرشيف",
+        icon: "folder",
+        wide: true,
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 2,
+        title: "الأرشيف",
+        numberOrSub: "1",
+        category: "أرشيف",
+        icon: "book",
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 3,
+        title: "الأرشيف",
+        numberOrSub: "2",
+        category: "أرشيف",
+        icon: "book",
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 4,
+        title: "الأرشيف",
+        numberOrSub: "3",
+        category: "أرشيف",
+        icon: "book",
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 5,
+        title: "الأرشيف",
+        numberOrSub: "4",
+        category: "أرشيف",
+        icon: "book",
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 6,
+        title: "الأرشيف",
+        numberOrSub: "13",
+        category: "أرشيف",
+        icon: "book",
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 7,
+        title: "القناة",
+        numberOrSub: "الرسمية",
+        category: "قنوات",
+        icon: "channel",
+        wide: true,
+        url: "https://t.me/telegram"
+      },
+      {
+        id: 8,
+        title: "مجموعة",
+        numberOrSub: "النقاش",
+        category: "مجموعات",
+        icon: "group",
+        wide: true,
+        url: "https://t.me/telegram"
+      },
+      {
+        id: 9,
+        title: "بوت",
+        numberOrSub: "الخدمات",
+        category: "بوتات",
+        icon: "bot",
+        wide: true,
+        url: "https://t.me/b_borx34bot"
+      },
+      {
+        id: 10,
+        title: "حساب",
+        numberOrSub: "التواصل",
+        category: "تواصل",
+        icon: "contact",
+        wide: true,
+        url: "https://t.me/telegram"
+      }
+    ];
+
+    // مكتبة الأيقونات ثلاثية الأبعاد (SVG) المخصصة لكل نوع قسم
+    const ICONS_MAP = {
+      // 1. الكتاب ثلاثي الأبعاد للأرشيف الفرعي
+      book: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="8,24 34,12 58,22 32,36" fill="rgba(0,0,0,0.35)" />
+          <polygon points="8,22 34,10 56,20 30,33" fill="#111622" />
+          <polygon points="10,20 34,18 54,18 31,30" fill="#e2e8f0" />
+          <polygon points="31,24 54,14 55,19 31,31" fill="#f8fafc" />
+          <line x1="32" y1="26" x2="53" y2="16" stroke="#94a3b8" stroke-width="0.9" />
+          <line x1="32" y1="28" x2="53" y2="18" stroke="#94a3b8" stroke-width="0.9" />
+          <polygon points="8,16 31,24 31,31 8,22" fill="#2b354f" />
+          <polygon points="9,17 30,25 30,29 9,21" fill="#475577" />
+          <polygon points="8,16 34,5 56,14 31,24" fill="#151922" stroke="#2d3748" stroke-width="0.7" />
+        </svg>
+      `,
+      // 2. مجلد الأرشيف الذهبي المميز
+      folder: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="12" width="44" height="30" rx="6" fill="rgba(0,0,0,0.3)" />
+          <path d="M10 14C10 11.2 12.2 9 15 9H26L31 14H49C51.8 14 54 16.2 54 19V35C54 37.8 51.8 40 49 40H15C12.2 40 10 37.8 10 35V14Z" fill="#d97706" />
+          <rect x="14" y="15" width="36" height="16" rx="3" fill="#f8fafc" />
+          <line x1="19" y1="19" x2="45" y2="19" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round" />
+          <path d="M8 21C8 18.8 9.8 17 12 17H52C54.2 17 56 18.8 56 21L53.5 37C53.2 39.2 51.3 41 49 41H15C12.7 41 10.8 39.2 10.5 37L8 21Z" fill="url(#folderGrad)" stroke="#fef08a" stroke-width="0.8" />
+          <defs>
+            <linearGradient id="folderGrad" x1="8" y1="17" x2="56" y2="41" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#fbbf24" />
+              <stop offset="1" stop-color="#d97706" />
+            </linearGradient>
+          </defs>
+        </svg>
+      `,
+      // 3. مكبّر الصوت للقنوات الرسمية
+      channel: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="41" rx="16" ry="3.5" fill="rgba(0,0,0,0.28)" />
+          <path d="M18 20H26L44 10V36L26 26H18C15.2 26 13 23.8 13 21V25C13 22.2 15.2 20 18 20Z" fill="#1e293b" />
+          <path d="M16 18H25L44 8V34L25 24H16C13.8 24 12 22.2 12 20V22C12 19.8 13.8 18 16 18Z" fill="url(#chanGrad)" stroke="#e2e8f0" stroke-width="0.9" />
+          <path d="M18 24L21 35C21.5 36.5 20.4 38 18.8 38H16.5C15.3 38 14.3 37.2 14 36L11.5 24H18Z" fill="#0f172a" />
+          <path d="M49 14C51.5 16.5 51.5 25.5 49 28" stroke="#fde047" stroke-width="2.4" stroke-linecap="round" />
+          <path d="M53.5 10.5C57.5 14.5 57.5 27.5 53.5 31.5" stroke="#fde047" stroke-width="2.2" stroke-linecap="round" opacity="0.8" />
+          <defs>
+            <linearGradient id="chanGrad" x1="12" y1="8" x2="44" y2="34" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#38bdf8" />
+              <stop offset="1" stop-color="#1d4ed8" />
+            </linearGradient>
+          </defs>
+        </svg>
+      `,
+      // 4. أيقونة المجموعات والنقاش
+      group: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="42" rx="18" ry="3.5" fill="rgba(0,0,0,0.28)" />
+          <circle cx="22" cy="17" r="6" fill="#cbd5e1" />
+          <path d="M11 33C11 28 15.5 25 22 25C28.5 25 33 28 33 33V35H11V33Z" fill="#94a3b8" />
+          <circle cx="43" cy="17" r="6" fill="#cbd5e1" />
+          <path d="M32 33C32 28 36.5 25 43 25C49.5 25 54 28 54 33V35H32V33Z" fill="#64748b" />
+          <circle cx="32" cy="14" r="7.5" fill="#f8fafc" stroke="#1e293b" stroke-width="1" />
+          <path d="M18 36C18 29.5 23.8 25.5 32 25.5C40.2 25.5 46 29.5 46 36V38H18V36Z" fill="url(#grpGrad)" stroke="#e2e8f0" stroke-width="0.9" />
+          <defs>
+            <linearGradient id="grpGrad" x1="18" y1="25" x2="46" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#34d399" />
+              <stop offset="1" stop-color="#059669" />
+            </linearGradient>
+          </defs>
+        </svg>
+      `,
+      // 5. أيقونة البوت الذكي
+      bot: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="42" rx="15" ry="3.5" fill="rgba(0,0,0,0.28)" />
+          <line x1="32" y1="5" x2="32" y2="12" stroke="#f8fafc" stroke-width="2.4" stroke-linecap="round" />
+          <circle cx="32" cy="5" r="3" fill="#fde047" />
+          <rect x="15" y="12" width="34" height="25" rx="8" fill="url(#botGrad)" stroke="#f8fafc" stroke-width="1.1" />
+          <rect x="20" y="17" width="24" height="11" rx="4" fill="#0f172a" />
+          <circle cx="26" cy="22.5" r="2.6" fill="#38bdf8" />
+          <circle cx="38" cy="22.5" r="2.6" fill="#38bdf8" />
+          <path d="M26 32H38" stroke="#f8fafc" stroke-width="2.2" stroke-linecap="round" />
+          <rect x="11" y="19" width="3.5" height="9" rx="1.7" fill="#cbd5e1" />
+          <rect x="49.5" y="19" width="3.5" height="9" rx="1.7" fill="#cbd5e1" />
+          <defs>
+            <linearGradient id="botGrad" x1="15" y1="12" x2="49" y2="37" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#818cf8" />
+              <stop offset="1" stop-color="#312e81" />
+            </linearGradient>
+          </defs>
+        </svg>
+      `,
+      // 6. أيقونة حساب التواصل والرسائل
+      contact: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="42" rx="16" ry="3.5" fill="rgba(0,0,0,0.28)" />
+          <path d="M12 14C12 10.7 14.7 8 18 8H46C49.3 8 52 10.7 52 14V30C52 33.3 49.3 36 46 36H26L16 41V36H18C14.7 36 12 33.3 12 30V14Z" fill="url(#chatGrad)" stroke="#f8fafc" stroke-width="1" />
+          <path d="M21 21L42 13L37 31L30 25.5L26 29V24L37 16.5L24.5 23L21 21Z" fill="#ffffff" />
+          <defs>
+            <linearGradient id="chatGrad" x1="12" y1="8" x2="52" y2="38" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#f472b6" />
+              <stop offset="1" stop-color="#9d174d" />
+            </linearGradient>
+          </defs>
+        </svg>
+      `,
+      // 7. أيقونة النجمة المميزة
+      star: `
+        <svg class="book-icon" viewBox="0 0 64 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="32" cy="42" rx="14" ry="3" fill="rgba(0,0,0,0.28)" />
+          <path d="M32 6L38.2 18.6L52 20.6L42 30.3L44.4 44L32 37.5L19.6 44L22 30.3L12 20.6L25.8 18.6L32 6Z" fill="#fbbf24" stroke="#fef08a" stroke-width="1.2" stroke-linejoin="round" />
+        </svg>
+      `
+    };
+
+    function getSectionIcon(item) {
+      if (item.icon && ICONS_MAP[item.icon]) {
+        return ICONS_MAP[item.icon];
+      }
+      // اختيار الأيقونة تلقائيًا حسب التصنيف إذا لم يحدد المستخدم icon
+      const cat = (item.category || "").trim();
+      if (cat === "قنوات") return ICONS_MAP.channel;
+      if (cat === "مجموعات") return ICONS_MAP.group;
+      if (cat === "بوتات") return ICONS_MAP.bot;
+      if (cat === "تواصل") return ICONS_MAP.contact;
+      return ICONS_MAP.book;
+    }
+
+    // =========================================================================
+    // 2. طبقة جلب البيانات (DataService) لسهولة الربط مع API أو Firebase
+    // =========================================================================
+    const DataService = {
+      async getSections() {
+        if (CONFIG.apiEndpoint) {
+          const response = await fetch(CONFIG.apiEndpoint);
+          if (!response.ok) throw new Error("فشل تحميل البيانات");
+          return await response.json();
+        }
+        return Promise.resolve(SECTIONS_DATA);
+      }
+    };
+
+    // =========================================================================
+    // 3. تكامل Telegram WebApp وفتح الروابط (قنوات / مجموعات / بوتات / حسابات)
+    // =========================================================================
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+
+    function triggerHaptic() {
+      try {
+        if (tg && tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred("light");
+        }
+      } catch (_) {}
+    }
+
+    function openSectionTarget(url) {
+      if (!url) return;
+      triggerHaptic();
+
+      // تحويل المعرفات المباشرة مثل @username إلى رابط تيليجرام كامل تلقائيًا
+      let normalizedUrl = url.trim();
+      if (normalizedUrl.startsWith("@")) {
+        normalizedUrl = "https://t.me/" + normalizedUrl.slice(1);
+      }
+
+      const isTelegramUrl =
+        normalizedUrl.startsWith("https://t.me/") ||
+        normalizedUrl.startsWith("http://t.me/") ||
+        normalizedUrl.startsWith("tg://");
+
+      if (tg) {
+        if (isTelegramUrl && typeof tg.openTelegramLink === "function") {
+          // يفتح القناة أو البوت أو المجموعة أو حساب التواصل مباشرة داخل تطبيق تيليجرام
+          tg.openTelegramLink(normalizedUrl);
+          return;
+        }
+        if (typeof tg.openLink === "function") {
+          tg.openLink(normalizedUrl);
+          return;
+        }
+      }
+
+      window.open(normalizedUrl, "_blank", "noopener,noreferrer");
+    }
+
+    // =========================================================================
+    // 4. عرض الأقسام والفلترة ودعم الأقسام الفرعية (إن وجدت)
+    // =========================================================================
+    let allSections = [];
+    let currentSubItems = null;
+    let activeCategory = "الكل";
+    let searchQuery = "";
+
+    const sectionsColumn = document.getElementById("sections-column");
+    const filterChipsEl = document.getElementById("filter-chips");
+    const searchBoxEl = document.getElementById("search-box");
+    const searchInputEl = document.getElementById("search-input");
+
+    function renderFilterChips() {
+      if (!CONFIG.showHeaderControls || currentSubItems) {
+        filterChipsEl.style.display = "none";
+        searchBoxEl.style.display = "none";
+        return;
+      }
+
+      filterChipsEl.style.display = "flex";
+      searchBoxEl.style.display = "block";
+
+      const categories = ["الكل", ...new Set(allSections.map(item => item.category).filter(Boolean))];
+      filterChipsEl.innerHTML = categories
+        .map(
+          cat => `
+          <button type="button" class="chip ${activeCategory === cat ? "active" : ""}" data-cat="${cat}">
+            ${cat}
+          </button>
+        `
+        )
+        .join("");
+
+      filterChipsEl.querySelectorAll(".chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          triggerHaptic();
+          activeCategory = btn.dataset.cat;
+          renderFilterChips();
+          renderSections();
+        });
+      });
+    }
+
+    function renderSections() {
+      const sourceList = currentSubItems || allSections;
+      const q = searchQuery.trim().toLowerCase();
+
+      const filtered = sourceList.filter(item => {
+        const matchesCat =
+          currentSubItems || activeCategory === "الكل" || item.category === activeCategory;
+        const fullTitle = `${item.title} ${item.numberOrSub || ""}`.toLowerCase();
+        const matchesSearch = !q || fullTitle.includes(q);
+        return matchesCat && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        sectionsColumn.innerHTML = `<div class="empty-msg">لا توجد أقسام مطابقة</div>`;
+        return;
+      }
+
+      sectionsColumn.innerHTML = filtered
+        .map(
+          (item, idx) => `
+          <div class="section-tile ${item.wide ? "wide-card-tile" : ""}" role="button" tabindex="0" data-index="${idx}">
+            ${getSectionIcon(item)}
+            <div class="tile-text-wrap">
+              <div class="tile-title">${item.title}</div>
+              ${item.numberOrSub ? `<div class="tile-subtitle">${item.numberOrSub}</div>` : ""}
+            </div>
+            <span class="tile-arrow">‹</span>
+          </div>
+        `
+        )
+        .join("");
+
+      sectionsColumn.querySelectorAll(".section-tile").forEach(tile => {
+        tile.addEventListener("click", () => {
+          const item = filtered[Number(tile.dataset.index)];
+          if (!item) return;
+
+          if (Array.isArray(item.children) && item.children.length > 0) {
+            triggerHaptic();
+            currentSubItems = item.children;
+            if (tg && tg.BackButton) tg.BackButton.show();
+            renderFilterChips();
+            renderSections();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            openSectionTarget(item.url);
+          }
+        });
+      });
+    }
+
+    function handleBackButton() {
+      if (currentSubItems) {
+        triggerHaptic();
+        currentSubItems = null;
+        if (tg && tg.BackButton) tg.BackButton.hide();
+        renderFilterChips();
+        renderSections();
+      }
+    }
+
+    // =========================================================================
+    // 5. خلفية فضائية فاخرة (سدم متوهجة + نجوم متلألئة + شهب ساقطة + 3 أنماط)
+    // =========================================================================
+    function initStarryBackground() {
+      const canvas = document.getElementById("stars-canvas");
+      const ctx = canvas.getContext("2d");
+
+      const BG_THEMES = [
+        {
+          id: "galaxy",
+          name: "المجرة الملكية",
+          bgGradient: ["#0c1433", "#060919", "#020308"],
+          nebulaColors: [
+            "rgba(88, 101, 242, 0.13)",
+            "rgba(168, 85, 247, 0.11)",
+            "rgba(56, 189, 248, 0.09)"
+          ],
+          starPalette: ["#ffffff", "#e0f2fe", "#fde68a", "#c4b5fd", "#7dd3fc", "#fda4af"]
+        },
+        {
+          id: "aurora",
+          name: "الشفق الذهبي",
+          bgGradient: ["#0f172a", "#071118", "#020409"],
+          nebulaColors: [
+            "rgba(245, 158, 11, 0.12)",
+            "rgba(16, 185, 129, 0.10)",
+            "rgba(99, 102, 241, 0.10)"
+          ],
+          starPalette: ["#ffffff", "#fde047", "#6ee7b7", "#fcd34d", "#a7f3d0"]
+        },
+        {
+          id: "classic",
+          name: "نجوم ملونة",
+          bgGradient: ["#090a14", "#04040a", "#010103"],
+          nebulaColors: [
+            "rgba(255, 42, 75, 0.07)",
+            "rgba(37, 232, 108, 0.06)",
+            "rgba(123, 223, 242, 0.07)"
+          ],
+          starPalette: ["#ffffff", "#ff2a4b", "#25e86c", "#ffd166", "#ff7b54", "#7bdff2"]
+        }
+      ];
+
+      let currentThemeIndex = 0;
+      let stars = [];
+      let nebulas = [];
+      let shootingStars = [];
+
+      function getTheme() {
+        return BG_THEMES[currentThemeIndex];
+      }
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        createScene();
+      }
+
+      function createScene() {
+        const theme = getTheme();
+        const count = Math.floor((canvas.width * canvas.height) / 1600);
+        stars = [];
+
+        for (let i = 0; i < count; i++) {
+          const isBrightSparkle = Math.random() < 0.1;
+          stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: isBrightSparkle ? Math.random() * 2.1 + 1.3 : Math.random() * 1.3 + 0.35,
+            color: theme.starPalette[Math.floor(Math.random() * theme.starPalette.length)],
+            alpha: Math.random() * 0.85 + 0.15,
+            speed: (Math.random() * 0.014 + 0.003) * (Math.random() < 0.5 ? 1 : -1),
+            driftY: -(Math.random() * 0.12 + 0.02),
+            sparkle: isBrightSparkle
+          });
+        }
+
+        // سحب سديمية ناعمة تتحرك ببطء في الخلفية
+        nebulas = theme.nebulaColors.map((color, idx) => ({
+          x: (canvas.width / 3) * idx + canvas.width * 0.2,
+          y: (canvas.height / 3) * idx + canvas.height * 0.18,
+          radius: Math.max(canvas.width, canvas.height) * (0.38 + idx * 0.06),
+          color,
+          vx: (Math.random() * 0.25 + 0.08) * (idx % 2 === 0 ? 1 : -1),
+          vy: (Math.random() * 0.2 + 0.06) * (idx % 2 === 0 ? -1 : 1)
+        }));
+      }
+
+      function spawnShootingStar() {
+        if (shootingStars.length >= 2) return;
+        const startX = Math.random() * canvas.width * 0.85 + canvas.width * 0.1;
+        const startY = Math.random() * canvas.height * 0.45;
+        const angle = (Math.PI / 4) + (Math.random() * 0.2 - 0.1);
+        const speed = Math.random() * 6 + 7;
+
+        shootingStars.push({
+          x: startX,
+          y: startY,
+          vx: -Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          len: Math.random() * 75 + 55,
+          alpha: 1
+        });
+      }
+
+      function draw() {
+        const theme = getTheme();
+
+        // 1. تدرج الفضاء العميق
+        const bgGrad = ctx.createRadialGradient(
+          canvas.width * 0.5,
+          canvas.height * 0.2,
+          10,
+          canvas.width * 0.5,
+          canvas.height * 0.5,
+          Math.max(canvas.width, canvas.height)
+        );
+        bgGrad.addColorStop(0, theme.bgGradient[0]);
+        bgGrad.addColorStop(0.55, theme.bgGradient[1]);
+        bgGrad.addColorStop(1, theme.bgGradient[2]);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 2. رسم السدم الفضائية المضيئة
+        for (const n of nebulas) {
+          n.x += n.vx;
+          n.y += n.vy;
+          if (n.x < -100 || n.x > canvas.width + 100) n.vx *= -1;
+          if (n.y < -100 || n.y > canvas.height + 100) n.vy *= -1;
+
+          const nebGrad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.radius);
+          nebGrad.addColorStop(0, n.color);
+          nebGrad.addColorStop(1, "rgba(0, 0, 0, 0)");
+          ctx.fillStyle = nebGrad;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 3. رسم النجوم المتلألئة وحركتها الانسيابية
+        for (const s of stars) {
+          s.alpha += s.speed;
+          if (s.alpha >= 1) {
+            s.alpha = 1;
+            s.speed = -s.speed;
+          } else if (s.alpha <= 0.15) {
+            s.alpha = 0.15;
+            s.speed = -s.speed;
+          }
+
+          s.y += s.driftY;
+          if (s.y < -4) {
+            s.y = canvas.height + 4;
+            s.x = Math.random() * canvas.width;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = s.alpha;
+          ctx.fillStyle = s.color;
+          ctx.shadowBlur = s.sparkle ? 12 : 4;
+          ctx.shadowColor = s.color;
+
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+
+          if (s.sparkle) {
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = 0.85;
+            const len = s.r * 4.2;
+            ctx.beginPath();
+            ctx.moveTo(s.x - len, s.y);
+            ctx.lineTo(s.x + len, s.y);
+            ctx.moveTo(s.x, s.y - len);
+            ctx.lineTo(s.x, s.y + len);
+            ctx.stroke();
+          }
+
+          ctx.restore();
+        }
+
+        // 4. رسم الشهب الساقطة (Shooting Stars)
+        if (Math.random() < 0.012) {
+          spawnShootingStar();
+        }
+
+        for (let i = shootingStars.length - 1; i >= 0; i--) {
+          const sh = shootingStars[i];
+          sh.x += sh.vx;
+          sh.y += sh.vy;
+          sh.alpha -= 0.016;
+
+          if (sh.alpha <= 0 || sh.x < -100 || sh.y > canvas.height + 100) {
+            shootingStars.splice(i, 1);
+            continue;
+          }
+
+          const tailX = sh.x - (sh.vx / Math.hypot(sh.vx, sh.vy)) * sh.len;
+          const tailY = sh.y - (sh.vy / Math.hypot(sh.vx, sh.vy)) * sh.len;
+
+          ctx.save();
+          const tailGrad = ctx.createLinearGradient(sh.x, sh.y, tailX, tailY);
+          tailGrad.addColorStop(0, `rgba(255, 255, 255, ${sh.alpha})`);
+          tailGrad.addColorStop(0.3, `rgba(253, 230, 138, ${sh.alpha * 0.7})`);
+          tailGrad.addColorStop(1, "rgba(255, 255, 255, 0)");
+
+          ctx.strokeStyle = tailGrad;
+          ctx.lineWidth = 2;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(sh.x, sh.y);
+          ctx.lineTo(tailX, tailY);
+          ctx.stroke();
+
+          // رأس الشهاب اللامع
+          ctx.fillStyle = `rgba(255, 255, 255, ${sh.alpha})`;
+          ctx.shadowBlur = 10;
+          ctx.shadowColor = "#fde68a";
+          ctx.beginPath();
+          ctx.arc(sh.x, sh.y, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+
+        requestAnimationFrame(draw);
+      }
+
+      // تبديل ثيم الخلفية عند الضغط على زر الزاوية
+      const bgBtn = document.getElementById("bg-style-btn");
+      const bgLabel = document.getElementById("bg-style-label");
+      if (bgBtn && bgLabel) {
+        bgBtn.addEventListener("click", () => {
+          triggerHaptic();
+          currentThemeIndex = (currentThemeIndex + 1) % BG_THEMES.length;
+          bgLabel.textContent = getTheme().name;
+          createScene();
+          spawnShootingStar();
+        });
+      }
+
+      window.addEventListener("resize", resize);
+      resize();
+      setTimeout(spawnShootingStar, 800);
+      draw();
+    }
+
+    // =========================================================================
+    // 6. التهيئة العامة وزر الصعود للأعلى
+    // =========================================================================
+    async function initApp() {
+      if (tg) {
+        tg.ready();
+        tg.expand();
+        if (tg.setHeaderColor) tg.setHeaderColor("#17212b");
+        if (tg.setBackgroundColor) tg.setBackgroundColor("#020205");
+        if (tg.BackButton) tg.BackButton.onClick(handleBackButton);
+      }
+
+      const user = tg?.initDataUnsafe?.user;
+      const greetingEl = document.getElementById("user-greeting");
+      if (CONFIG.showHeaderControls && user && (user.first_name || user.username)) {
+        const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username;
+        greetingEl.textContent = `أهلاً بك يا ${name} ✨`;
+      } else {
+        greetingEl.style.display = "none";
+      }
+
+      const footerEl = document.getElementById("bot-footer");
+      footerEl.textContent = CONFIG.botUsername;
+      footerEl.addEventListener("click", () => openSectionTarget(CONFIG.botUrl));
+
+      searchInputEl.addEventListener("input", e => {
+        searchQuery = e.target.value;
+        renderSections();
+      });
+
+      const scrollTopBtn = document.getElementById("scroll-top-btn");
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 120) {
+          scrollTopBtn.classList.add("visible");
+        } else {
+          scrollTopBtn.classList.remove("visible");
+        }
+      });
+
+      scrollTopBtn.addEventListener("click", () => {
+        triggerHaptic();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      // أنماط ترتيب الأزرار والتبديل الفوري بينها
+      const LAYOUT_MODES = [
+        { id: "hybrid", name: "شبكة + بطاقات", className: "layout-hybrid" },
+        { id: "grid-2", name: "شبكة مزدوجة", className: "layout-grid-2" },
+        { id: "cards", name: "بطاقات عريضة", className: "layout-cards" },
+        { id: "column", name: "عمود كلاسيكي", className: "" }
+      ];
+
+      let currentLayoutIndex = Math.max(
+        0,
+        LAYOUT_MODES.findIndex(m => m.id === CONFIG.defaultLayout)
+      );
+
+      const layoutBtn = document.getElementById("layout-style-btn");
+      const layoutLabel = document.getElementById("layout-style-label");
+
+      function applyLayoutMode() {
+        const mode = LAYOUT_MODES[currentLayoutIndex];
+        sectionsColumn.classList.remove("layout-hybrid", "layout-grid-2", "layout-cards", "layout-zigzag");
+        if (mode.className) {
+          sectionsColumn.classList.add(mode.className);
+        }
+        if (layoutLabel) {
+          layoutLabel.textContent = mode.name;
+        }
+      }
+
+      if (layoutBtn) {
+        layoutBtn.addEventListener("click", () => {
+          triggerHaptic();
+          currentLayoutIndex = (currentLayoutIndex + 1) % LAYOUT_MODES.length;
+          applyLayoutMode();
+        });
+      }
+
+      applyLayoutMode();
+      initStarryBackground();
+
+      allSections = await DataService.getSections();
+      renderFilterChips();
+      renderSections();
+    }
+
+    initApp();
+  </script>
+</body>
+</html>
