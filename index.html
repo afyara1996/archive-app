@@ -435,6 +435,198 @@
       border-top: 1px solid rgba(255, 255, 255, 0.06);
       cursor: pointer;
     }
+
+    /* =========================================================================
+       تنسيق قسم التبرع المدمج الذكي (Compact Tabs)
+       ========================================================================= */
+    .donation-container {
+      width: 100%;
+      max-width: 320px;
+      margin: 22px auto 12px;
+      padding: 12px 14px;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(253, 230, 138, 0.25);
+      border-radius: 16px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+    }
+
+    .donation-container h3 {
+      font-size: 0.92rem;
+      color: #fde047;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      gap: 5px;
+    }
+
+    /* أزرار اختيار العملة (Tabs أفقية صغيرة) */
+    .crypto-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .crypto-tab-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .crypto-tab-btn.active {
+      background: #fde047;
+      color: #0f172a;
+      border-color: #fde047;
+      box-shadow: 0 0 10px rgba(253, 224, 71, 0.4);
+    }
+
+    /* صندوق عرض المحفظة النشطة فقط */
+    .donation-address-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 7px 10px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .donation-address {
+      font-family: monospace;
+      font-size: 0.74rem;
+      color: #93c5fd;
+      word-break: break-all;
+      text-align: left;
+      direction: ltr;
+      user-select: all;
+    }
+
+    .copy-btn {
+      background: #38bdf8;
+      color: #0f172a;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+
+    .copy-btn:active {
+      opacity: 0.7;
+    }
+
+    /* =========================================================================
+       1. شريط التنبيهات والأخبار المتحرك الأنيق (Announcement Ticker)
+       ========================================================================= */
+    .announcement-bar {
+      width: 100%;
+      max-width: 380px;
+      margin: 0 auto 14px;
+      padding: 7px 12px;
+      background: rgba(15, 23, 42, 0.72);
+      border: 1px solid rgba(253, 230, 138, 0.28);
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+
+    .announcement-badge {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .announcement-ticker {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+    }
+
+    .announcement-text {
+      display: inline-block;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      font-weight: 600;
+      animation: tickerAnimation 16s linear infinite;
+    }
+
+    .announcement-bar:hover .announcement-text {
+      animation-play-state: paused;
+    }
+
+    @keyframes tickerAnimation {
+      0% {
+        transform: translateX(-100%);
+      }
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* =========================================================================
+       2. زر ونجمة المفضلة (Favorite System)
+       ========================================================================= */
+    .fav-star-btn {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0, 0, 0, 0.28);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.45);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      cursor: pointer;
+      z-index: 5;
+      transition: all 0.2s ease;
+    }
+
+    .fav-star-btn:hover {
+      transform: scale(1.15);
+      color: #fde047;
+    }
+
+    .fav-star-btn.is-fav {
+      color: #fde047;
+      background: rgba(253, 224, 71, 0.2);
+      border-color: #fde047;
+      text-shadow: 0 0 8px #fde047;
+    }
+
+    .section-tile {
+      position: relative;
+    }
   </style>
 </head>
 <body>
@@ -455,6 +647,14 @@
   </button>
 
   <div class="main-wrapper">
+    <!-- 1. شريط التنبيهات والأخبار السريع -->
+    <div id="announcement-bar" class="announcement-bar">
+      <span class="announcement-badge">📢 جديد</span>
+      <div class="announcement-ticker">
+        <span id="announcement-text" class="announcement-text">✨ مرحباً بكم في دليل الأقسام والأرشيف | تم تحديث جميع الروابط والقنوات بنجاح!</span>
+      </div>
+    </div>
+
     <div id="top-bar" class="top-bar">
       <div id="user-greeting" class="greeting-text"></div>
       <div id="search-box" class="search-box">
@@ -472,6 +672,36 @@
 
     <!-- عمود الأقسام الرأسي -->
     <main id="sections-column" class="sections-column"></main>
+
+    <!-- [قسم التبرع] لتفعيله احذف فقط كلمة style="display: none;" من السطر التالي وضَع عناوين محافظك مكان الكلمات المخصصة -->
+    <section id="donation-section" class="donation-container" style="display: none;">
+      <h3>☕ دعم المدونة</h3>
+
+      <!-- أزرار العملات المدمجة -->
+      <div class="crypto-tabs">
+        <button type="button" class="crypto-tab-btn active" onclick="switchCryptoTab('ton')">💎 TON</button>
+        <button type="button" class="crypto-tab-btn" onclick="switchCryptoTab('usdt')">💵 USDT</button>
+        <button type="button" class="crypto-tab-btn" onclick="switchCryptoTab('btc')">₿ BTC</button>
+        <button type="button" class="crypto-tab-btn" onclick="switchCryptoTab('eth')">🔷 ETH</button>
+      </div>
+
+      <!-- خانة العنوان المتغيرة حسب الزر -->
+      <div class="donation-address-row">
+        <span class="donation-address" id="active-crypto-address">ضع_عنوان_محفظة_TON_هنا</span>
+        <button class="copy-btn" type="button" onclick="copyCurrentAddress()">نسخ</button>
+      </div>
+
+      <!-- حفظ عناوين المحافظ هنا لتغييرها بسهولة -->
+      <div style="display: none;">
+        <span id="addr-ton">ضع_عنوان_محفظة_TON_هنا</span>
+        <span id="addr-usdt">ضع_عنوان_محفظة_USDT_هنا</span>
+        <span id="addr-btc">ضع_عنوان_محفظة_BTC_هنا</span>
+        <span id="addr-eth">ضع_عنوان_محفظة_ETH_هنا</span>
+      </div>
+
+      <small style="color: #94a3b8; font-size: 0.72rem;">جزاكم الله خير لدعمكم المتواصل! </small>
+    </section>
+
   </div>
 
   <!-- زر الصعود للأعلى مطابق للصورة -->
@@ -494,8 +724,12 @@
       botUrl: "https://t.me/b_borx34bot",
       // الترتيب الافتراضي للأزرار: "hybrid" (دمج الشبكة والبطاقات) | "grid-2" (شبكة مزدوجة) | "cards" (بطاقات عريضة) | "column" (عمود كلاسيكي)
       defaultLayout: "hybrid",
+      // نص شريط التنبيهات والأخبار السريع
+      announcementText: "✨ مرحباً بكم في دليل الأقسام والأرشيف | تم تحديث جميع الروابط والقنوات بنجاح!",
+      // إظهار شريط الأخبار: true (نعم) | false (إخفاء)
+      showAnnouncement: true,
       // اجعل showHeaderControls: false إذا أردت إخفاء البحث والفلترة ليظهر العمود فقط مثل الصورة تمامًا
-      showHeaderControls: false,
+      showHeaderControls: true,
       // إذا أردت لاحقًا جلب الأقسام من API أو Firebase ضع الرابط هنا:
       apiEndpoint: ""
     };
@@ -786,6 +1020,32 @@
     const searchBoxEl = document.getElementById("search-box");
     const searchInputEl = document.getElementById("search-input");
 
+    // نظام حفظ المفضلة في ذاكرة المتصفح (LocalStorage)
+    function getFavorites() {
+      try {
+        return JSON.parse(localStorage.getItem("tg_blog_favorites") || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function toggleFavorite(id, event) {
+      if (event) event.stopPropagation();
+      triggerHaptic();
+      let favs = getFavorites();
+      const numId = Number(id);
+      if (favs.includes(numId)) {
+        favs = favs.filter(x => x !== numId);
+      } else {
+        favs.push(numId);
+      }
+      try {
+        localStorage.setItem("tg_blog_favorites", JSON.stringify(favs));
+      } catch {}
+      renderSections();
+      renderFilterChips();
+    }
+
     function renderFilterChips() {
       if (!CONFIG.showHeaderControls || currentSubItems) {
         filterChipsEl.style.display = "none";
@@ -796,7 +1056,10 @@
       filterChipsEl.style.display = "flex";
       searchBoxEl.style.display = "block";
 
-      const categories = ["الكل", ...new Set(allSections.map(item => item.category).filter(Boolean))];
+      const favCount = getFavorites().length;
+      const favLabel = favCount > 0 ? `⭐ المفضلة (${favCount})` : "⭐ المفضلة";
+      const categories = ["الكل", favLabel, ...new Set(allSections.map(item => item.category).filter(Boolean))];
+
       filterChipsEl.innerHTML = categories
         .map(
           cat => `
@@ -820,32 +1083,55 @@
     function renderSections() {
       const sourceList = currentSubItems || allSections;
       const q = searchQuery.trim().toLowerCase();
+      const favs = getFavorites();
+      const isFavTab = activeCategory.startsWith("⭐ المفضلة");
 
       const filtered = sourceList.filter(item => {
-        const matchesCat =
-          currentSubItems || activeCategory === "الكل" || item.category === activeCategory;
+        let matchesCat = true;
+        if (currentSubItems) {
+          matchesCat = true;
+        } else if (isFavTab) {
+          matchesCat = favs.includes(Number(item.id));
+        } else if (activeCategory !== "الكل") {
+          matchesCat = item.category === activeCategory;
+        }
+
         const fullTitle = `${item.title} ${item.numberOrSub || ""}`.toLowerCase();
         const matchesSearch = !q || fullTitle.includes(q);
         return matchesCat && matchesSearch;
       });
 
       if (filtered.length === 0) {
-        sectionsColumn.innerHTML = `<div class="empty-msg">لا توجد أقسام مطابقة</div>`;
+        const emptyText = isFavTab 
+          ? "لم تقم بإضافة أي قسم إلى المفضلة بعد ⭐<br><small style='font-size: 0.8rem; color: #64748b;'>اضغط على رمز النجمة بأي قسم لحفظه هنا</small>" 
+          : "لا توجد أقسام مطابقة للبحث 🔍";
+        sectionsColumn.innerHTML = `<div class="empty-msg">${emptyText}</div>`;
         return;
       }
 
       sectionsColumn.innerHTML = filtered
         .map(
-          (item, idx) => `
-          <div class="section-tile ${item.wide ? "wide-card-tile" : ""}" role="button" tabindex="0" data-index="${idx}">
-            ${getSectionIcon(item)}
-            <div class="tile-text-wrap">
-              <div class="tile-title">${item.title}</div>
-              ${item.numberOrSub ? `<div class="tile-subtitle">${item.numberOrSub}</div>` : ""}
+          (item, idx) => {
+            const isFav = favs.includes(Number(item.id));
+            return `
+            <div class="section-tile ${item.wide ? "wide-card-tile" : ""}" role="button" tabindex="0" data-index="${idx}">
+              <button 
+                type="button" 
+                class="fav-star-btn ${isFav ? "is-fav" : ""}" 
+                title="${isFav ? "إزالة من المفضلة" : "إضافة للمفضلة"}" 
+                onclick="toggleFavorite(${item.id}, event)"
+              >
+                ${isFav ? "★" : "☆"}
+              </button>
+              ${getSectionIcon(item)}
+              <div class="tile-text-wrap">
+                <div class="tile-title">${item.title}</div>
+                ${item.numberOrSub ? `<div class="tile-subtitle">${item.numberOrSub}</div>` : ""}
+              </div>
+              <span class="tile-arrow">‹</span>
             </div>
-            <span class="tile-arrow">‹</span>
-          </div>
-        `
+          `;
+          }
         )
         .join("");
 
@@ -1145,6 +1431,16 @@
         greetingEl.style.display = "none";
       }
 
+      // ضبط شريط الإعلانات والتنبيهات
+      const announcementBar = document.getElementById("announcement-bar");
+      const announcementTextEl = document.getElementById("announcement-text");
+      if (CONFIG.showAnnouncement && CONFIG.announcementText) {
+        announcementTextEl.textContent = CONFIG.announcementText;
+        announcementBar.style.display = "flex";
+      } else {
+        announcementBar.style.display = "none";
+      }
+
       const footerEl = document.getElementById("bot-footer");
       footerEl.textContent = CONFIG.botUsername;
       footerEl.addEventListener("click", () => openSectionTarget(CONFIG.botUrl));
@@ -1209,6 +1505,27 @@
       allSections = await DataService.getSections();
       renderFilterChips();
       renderSections();
+    }
+
+    // التبديل بين العملات في خانة التبرع المدمجة
+    let currentCrypto = "ton";
+    function switchCryptoTab(coin) {
+      triggerHaptic();
+      currentCrypto = coin;
+      document.querySelectorAll(".crypto-tab-btn").forEach(btn => btn.classList.remove("active"));
+      event.target.classList.add("active");
+      const targetAddr = document.getElementById("addr-" + coin)?.innerText || "";
+      document.getElementById("active-crypto-address").innerText = targetAddr;
+    }
+
+    // دالة نسخ المحفظة المعروضة حالياً
+    function copyCurrentAddress() {
+      const address = document.getElementById("active-crypto-address")?.innerText;
+      if (!address || address.includes("ضع_عنوان_محفظة")) return;
+      navigator.clipboard.writeText(address).then(() => {
+        triggerHaptic();
+        alert("تم نسخ عنوان المحفظة بنجاح! شكراً لدعمك ❤️");
+      }).catch(() => {});
     }
 
     initApp();
