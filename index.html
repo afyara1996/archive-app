@@ -966,11 +966,11 @@
     // =========================================================================
     // 3. تكامل Telegram WebApp وفتح الروابط (قنوات / مجموعات / بوتات / حسابات)
     // =========================================================================
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
+    const tg = (typeof window !== "undefined" && window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
 
     function triggerHaptic() {
       try {
-        if (tg && tg.HapticFeedback) {
+        if (tg && tg.HapticFeedback && typeof tg.HapticFeedback.impactOccurred === "function") {
           tg.HapticFeedback.impactOccurred("light");
         }
       } catch (_) {}
@@ -991,16 +991,19 @@
         normalizedUrl.startsWith("http://t.me/") ||
         normalizedUrl.startsWith("tg://");
 
-      if (tg) {
-        if (isTelegramUrl && typeof tg.openTelegramLink === "function") {
-          // يفتح القناة أو البوت أو المجموعة أو حساب التواصل مباشرة داخل تطبيق تيليجرام
-          tg.openTelegramLink(normalizedUrl);
-          return;
+      try {
+        if (tg) {
+          if (isTelegramUrl && typeof tg.openTelegramLink === "function") {
+            tg.openTelegramLink(normalizedUrl);
+            return;
+          }
+          if (typeof tg.openLink === "function") {
+            tg.openLink(normalizedUrl);
+            return;
+          }
         }
-        if (typeof tg.openLink === "function") {
-          tg.openLink(normalizedUrl);
-          return;
-        }
+      } catch (e) {
+        console.warn("Fallback to window.open", e);
       }
 
       window.open(normalizedUrl, "_blank", "noopener,noreferrer");
@@ -1413,97 +1416,120 @@
     // 6. التهيئة العامة وزر الصعود للأعلى
     // =========================================================================
     async function initApp() {
-      if (tg) {
-        tg.ready();
-        tg.expand();
-        if (tg.setHeaderColor) tg.setHeaderColor("#17212b");
-        if (tg.setBackgroundColor) tg.setBackgroundColor("#020205");
-        if (tg.BackButton) tg.BackButton.onClick(handleBackButton);
+      try {
+        if (tg) {
+          if (typeof tg.ready === "function") tg.ready();
+          if (typeof tg.expand === "function") tg.expand();
+          if (typeof tg.setHeaderColor === "function") tg.setHeaderColor("#17212b");
+          if (typeof tg.setBackgroundColor === "function") tg.setBackgroundColor("#020205");
+          if (tg.BackButton && typeof tg.BackButton.onClick === "function") {
+            tg.BackButton.onClick(handleBackButton);
+          }
+        }
+      } catch (err) {
+        console.warn("Telegram WebApp initialization error:", err);
       }
 
-      const user = tg?.initDataUnsafe?.user;
-      const greetingEl = document.getElementById("user-greeting");
-      if (CONFIG.showHeaderControls && user && (user.first_name || user.username)) {
-        const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username;
-        greetingEl.textContent = `أهلاً بك يا ${name} ✨`;
-      } else {
-        greetingEl.style.display = "none";
-      }
-
-      // ضبط شريط الإعلانات والتنبيهات
-      const announcementBar = document.getElementById("announcement-bar");
-      const announcementTextEl = document.getElementById("announcement-text");
-      if (CONFIG.showAnnouncement && CONFIG.announcementText) {
-        announcementTextEl.textContent = CONFIG.announcementText;
-        announcementBar.style.display = "flex";
-      } else {
-        announcementBar.style.display = "none";
-      }
-
-      const footerEl = document.getElementById("bot-footer");
-      footerEl.textContent = CONFIG.botUsername;
-      footerEl.addEventListener("click", () => openSectionTarget(CONFIG.botUrl));
-
-      searchInputEl.addEventListener("input", e => {
-        searchQuery = e.target.value;
-        renderSections();
-      });
-
-      const scrollTopBtn = document.getElementById("scroll-top-btn");
-      window.addEventListener("scroll", () => {
-        if (window.scrollY > 120) {
-          scrollTopBtn.classList.add("visible");
+      try {
+        const user = tg?.initDataUnsafe?.user;
+        const greetingEl = document.getElementById("user-greeting");
+        if (CONFIG.showHeaderControls && user && (user.first_name || user.username)) {
+          const name = [user.first_name, user.last_name].filter(Boolean).join(" ") || user.username;
+          greetingEl.textContent = `أهلاً بك يا ${name} ✨`;
         } else {
-          scrollTopBtn.classList.remove("visible");
+          greetingEl.style.display = "none";
         }
-      });
-
-      scrollTopBtn.addEventListener("click", () => {
-        triggerHaptic();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
-
-      // أنماط ترتيب الأزرار والتبديل الفوري بينها
-      const LAYOUT_MODES = [
-        { id: "hybrid", name: "شبكة + بطاقات", className: "layout-hybrid" },
-        { id: "grid-2", name: "شبكة مزدوجة", className: "layout-grid-2" },
-        { id: "cards", name: "بطاقات عريضة", className: "layout-cards" },
-        { id: "column", name: "عمود كلاسيكي", className: "" }
-      ];
-
-      let currentLayoutIndex = Math.max(
-        0,
-        LAYOUT_MODES.findIndex(m => m.id === CONFIG.defaultLayout)
-      );
-
-      const layoutBtn = document.getElementById("layout-style-btn");
-      const layoutLabel = document.getElementById("layout-style-label");
-
-      function applyLayoutMode() {
-        const mode = LAYOUT_MODES[currentLayoutIndex];
-        sectionsColumn.classList.remove("layout-hybrid", "layout-grid-2", "layout-cards", "layout-zigzag");
-        if (mode.className) {
-          sectionsColumn.classList.add(mode.className);
-        }
-        if (layoutLabel) {
-          layoutLabel.textContent = mode.name;
-        }
+      } catch (e) {
+        console.warn("User greeting error:", e);
       }
 
-      if (layoutBtn) {
-        layoutBtn.addEventListener("click", () => {
-          triggerHaptic();
-          currentLayoutIndex = (currentLayoutIndex + 1) % LAYOUT_MODES.length;
-          applyLayoutMode();
+      try {
+        // ضبط شريط الإعلانات والتنبيهات
+        const announcementBar = document.getElementById("announcement-bar");
+        const announcementTextEl = document.getElementById("announcement-text");
+        if (CONFIG.showAnnouncement && CONFIG.announcementText) {
+          announcementTextEl.textContent = CONFIG.announcementText;
+          announcementBar.style.display = "flex";
+        } else {
+          announcementBar.style.display = "none";
+        }
+
+        const footerEl = document.getElementById("bot-footer");
+        footerEl.textContent = CONFIG.botUsername;
+        footerEl.addEventListener("click", () => openSectionTarget(CONFIG.botUrl));
+
+        searchInputEl.addEventListener("input", e => {
+          searchQuery = e.target.value;
+          renderSections();
         });
+
+        const scrollTopBtn = document.getElementById("scroll-top-btn");
+        window.addEventListener("scroll", () => {
+          if (window.scrollY > 120) {
+            scrollTopBtn.classList.add("visible");
+          } else {
+            scrollTopBtn.classList.remove("visible");
+          }
+        });
+
+        scrollTopBtn.addEventListener("click", () => {
+          triggerHaptic();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        // أنماط ترتيب الأزرار والتبديل الفوري بينها
+        const LAYOUT_MODES = [
+          { id: "hybrid", name: "شبكة + بطاقات", className: "layout-hybrid" },
+          { id: "grid-2", name: "شبكة مزدوجة", className: "layout-grid-2" },
+          { id: "cards", name: "بطاقات عريضة", className: "layout-cards" },
+          { id: "column", name: "عمود كلاسيكي", className: "" }
+        ];
+
+        let currentLayoutIndex = Math.max(
+          0,
+          LAYOUT_MODES.findIndex(m => m.id === CONFIG.defaultLayout)
+        );
+
+        const layoutBtn = document.getElementById("layout-style-btn");
+        const layoutLabel = document.getElementById("layout-style-label");
+
+        function applyLayoutMode() {
+          const mode = LAYOUT_MODES[currentLayoutIndex];
+          sectionsColumn.classList.remove("layout-hybrid", "layout-grid-2", "layout-cards", "layout-zigzag");
+          if (mode.className) {
+            sectionsColumn.classList.add(mode.className);
+          }
+          if (layoutLabel) {
+            layoutLabel.textContent = mode.name;
+          }
+        }
+
+        if (layoutBtn) {
+          layoutBtn.addEventListener("click", () => {
+            triggerHaptic();
+            currentLayoutIndex = (currentLayoutIndex + 1) % LAYOUT_MODES.length;
+            applyLayoutMode();
+          });
+        }
+
+        applyLayoutMode();
+      } catch (e) {
+        console.warn("UI setup error:", e);
       }
 
-      applyLayoutMode();
-      initStarryBackground();
+      try {
+        initStarryBackground();
+      } catch (e) {
+        console.warn("Background canvas error:", e);
+      }
 
-      allSections = await DataService.getSections();
-      renderFilterChips();
-      renderSections();
+      try {
+        allSections = await DataService.getSections();
+        renderFilterChips();
+        renderSections();
+      } catch (e) {
+        console.error("Sections rendering error:", e);
+      }
     }
 
     // التبديل بين العملات في خانة التبرع المدمجة
