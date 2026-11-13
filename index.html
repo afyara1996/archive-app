@@ -739,6 +739,41 @@
       position: relative;
     }
 
+    /* صف أزرار التحكم العلوية (البحث + الترحيب) */
+    .top-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .top-actions-row .toggle-header-btn {
+      margin-bottom: 0;
+    }
+
+    .welcome-trigger-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(250, 204, 21, 0.35);
+      background: rgba(250, 204, 21, 0.12);
+      color: #fde047;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .welcome-trigger-btn:active {
+      transform: scale(0.95);
+    }
+
     /* نافذة الترحيب لأول زيارة (Welcome Popup) */
     .welcome-modal-overlay {
       position: fixed;
@@ -936,11 +971,17 @@
       </div>
     </div>
 
-    <!-- زر تبديل وضع العرض (إخفاء/إظهار شريط البحث والتصنيفات) -->
-    <button type="button" id="toggle-header-btn" class="toggle-header-btn">
-      <span id="toggle-header-icon">🔽</span>
-      <span id="toggle-header-text">إخفاء أدوات البحث والفلترة</span>
-    </button>
+    <!-- صف أزرار التحكم: إخفاء/إظهار البحث + فتح نافذة الترحيب -->
+    <div id="top-actions-row" class="top-actions-row">
+      <button type="button" id="toggle-header-btn" class="toggle-header-btn">
+        <span id="toggle-header-icon">🔽</span>
+        <span id="toggle-header-text">إخفاء أدوات البحث والفلترة</span>
+      </button>
+      <button type="button" id="open-welcome-btn" class="welcome-trigger-btn" onclick="openWelcomeModal()">
+        <span>👋</span>
+        <span>الترحيب</span>
+      </button>
+    </div>
 
     <div id="top-bar" class="top-bar">
       <div id="user-greeting" class="greeting-text"></div>
@@ -1491,7 +1532,7 @@
       const readerCategory = document.getElementById("reader-category");
       const readerBody = document.getElementById("reader-body");
       const topBarEl = document.getElementById("top-bar");
-      const toggleHeaderBtn = document.getElementById("toggle-header-btn");
+      const topActionsRow = document.getElementById("top-actions-row");
 
       if (!readerView || !sectionsColumn) return;
 
@@ -1509,8 +1550,8 @@
         wasTopBarVisibleBeforeReader = topBarEl.style.display !== "none";
         topBarEl.style.display = "none";
       }
-      if (toggleHeaderBtn) {
-        toggleHeaderBtn.style.display = "none";
+      if (topActionsRow) {
+        topActionsRow.style.display = "none";
       }
 
       sectionsColumn.style.display = "none";
@@ -1526,11 +1567,11 @@
       currentReaderItem = null;
       const readerView = document.getElementById("reader-view");
       const topBarEl = document.getElementById("top-bar");
-      const toggleHeaderBtn = document.getElementById("toggle-header-btn");
+      const topActionsRow = document.getElementById("top-actions-row");
 
       if (readerView) readerView.style.display = "none";
       if (sectionsColumn) sectionsColumn.style.display = "";
-      if (toggleHeaderBtn) toggleHeaderBtn.style.display = "";
+      if (topActionsRow) topActionsRow.style.display = "";
       if (topBarEl && wasTopBarVisibleBeforeReader) {
         topBarEl.style.display = "block";
       }
@@ -1555,20 +1596,36 @@
       }
     }
 
-    const WELCOME_STORAGE_KEY = "archive_welcome_seen_v1";
+    // غيّر رقم الإصدار (مثلاً v2) إذا عدّلت رسالة الترحيب لتظهر للجميع فوراً
+    const WELCOME_VERSION = "v1";
+    const WELCOME_STORAGE_KEY = "archive_welcome_seen_date";
+
+    function getTodayWelcomeStamp() {
+      try {
+        return `${WELCOME_VERSION}:${new Date().toISOString().slice(0, 10)}`;
+      } catch (e) {
+        return WELCOME_VERSION;
+      }
+    }
+
+    function openWelcomeModal() {
+      triggerHaptic();
+      const modal = document.getElementById("welcome-modal");
+      if (modal) modal.classList.add("is-open");
+    }
 
     function closeWelcomeModal() {
       triggerHaptic();
       const modal = document.getElementById("welcome-modal");
       if (modal) modal.classList.remove("is-open");
       try {
-        localStorage.setItem(WELCOME_STORAGE_KEY, "1");
+        localStorage.setItem(WELCOME_STORAGE_KEY, getTodayWelcomeStamp());
       } catch (e) {}
     }
 
     function openWelcomeChannel() {
       closeWelcomeModal();
-      openSectionTarget("https://t.me/telegram");
+      openSectionTarget("https://t.me/admirow");
     }
 
     // =========================================================================
@@ -1965,9 +2022,9 @@
         if (splash) {
           splash.classList.add("fade-out");
         }
-        // إظهار نافذة الترحيب لأول زيارة فقط
+        // إظهار نافذة الترحيب تلقائياً مرة واحدة يومياً (أو فور تغيير WELCOME_VERSION)
         try {
-          if (localStorage.getItem(WELCOME_STORAGE_KEY) !== "1") {
+          if (localStorage.getItem(WELCOME_STORAGE_KEY) !== getTodayWelcomeStamp()) {
             const welcomeModal = document.getElementById("welcome-modal");
             if (welcomeModal) {
               setTimeout(() => welcomeModal.classList.add("is-open"), 180);
