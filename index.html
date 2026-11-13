@@ -590,7 +590,7 @@
     }
 
     /* =========================================================================
-       2. زر ونجمة المفضلة (Favorite System)
+       2. زر ونجمة المفضلة والشارات المميزة (Badges & Favorites)
        ========================================================================= */
     .fav-star-btn {
       position: absolute;
@@ -623,12 +623,131 @@
       text-shadow: 0 0 8px #fde047;
     }
 
+    /* شارات الأقسام (جديد / حصري / مثبت) */
+    .section-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 999px;
+      letter-spacing: 0.2px;
+      z-index: 4;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    .badge-new {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      border: 1px solid rgba(167, 243, 208, 0.5);
+    }
+
+    .badge-hot {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #ffffff;
+      border: 1px solid rgba(254, 202, 202, 0.5);
+    }
+
+    .badge-pinned {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f172a;
+      border: 1px solid rgba(253, 230, 138, 0.6);
+    }
+
+    /* زر إخفاء وإظهار شريط البحث والتصنيفات (وضع ملء الشاشة النظيف) */
+    .toggle-header-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #cbd5e1;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 999px;
+      cursor: pointer;
+      margin: 0 auto 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s ease;
+    }
+
+    .toggle-header-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+
+    /* شاشة البداية والتحميل الفاخرة (Splash Screen) */
+    #splash-screen {
+      position: fixed;
+      inset: 0;
+      background: #03050c;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+
+    #splash-screen.fade-out {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-logo-circle {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #6366f1, #3b82f6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      box-shadow: 0 0 25px rgba(99, 102, 241, 0.6);
+      animation: splashPulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes splashPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.08); box-shadow: 0 0 35px rgba(129, 140, 248, 0.8); }
+    }
+
+    .splash-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #f8fafc;
+      letter-spacing: 0.5px;
+    }
+
+    .splash-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #fde047;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
     .section-tile {
       position: relative;
     }
   </style>
 </head>
 <body>
+
+  <!-- شاشة التحميل الافتتاحية السريعة والفاخرة (Splash Screen) -->
+  <div id="splash-screen">
+    <div class="splash-logo-circle">📚</div>
+    <div class="splash-title">دليل الأقسام والأرشيف</div>
+    <div class="splash-spinner"></div>
+  </div>
 
   <!-- خلفية المجرة والنجوم والشهب -->
   <canvas id="stars-canvas"></canvas>
@@ -653,6 +772,12 @@
         <span id="announcement-text" class="announcement-text">✨ مرحباً بكم في دليل الأقسام والأرشيف | تم تحديث جميع الروابط والقنوات بنجاح!</span>
       </div>
     </div>
+
+    <!-- زر تبديل وضع العرض (إخفاء/إظهار شريط البحث والتصنيفات) -->
+    <button type="button" id="toggle-header-btn" class="toggle-header-btn">
+      <span id="toggle-header-icon">🔽</span>
+      <span id="toggle-header-text">إخفاء أدوات البحث والفلترة</span>
+    </button>
 
     <div id="top-bar" class="top-bar">
       <div id="user-greeting" class="greeting-text"></div>
@@ -724,7 +849,7 @@
       // الترتيب الافتراضي للأزرار: "hybrid" (دمج الشبكة والبطاقات) | "grid-2" (شبكة مزدوجة) | "cards" (بطاقات عريضة) | "column" (عمود كلاسيكي)
       defaultLayout: "hybrid",
       // نص شريط التنبيهات والأخبار السريع
-      announcementText: "✨ مرحباً بكم في دليل الأقسام والأرشيف | تم تحديث جميع الروابط والقنوات بنجاح!",
+      announcementText: " مرحباً بكم في دليل الأقسام والأرشيف | تم تحديث جميع الروابط والقنوات بنجاح!",
       // إظهار شريط الأخبار: true (نعم) | false (إخفاء)
       showAnnouncement: true,
       // اجعل showHeaderControls: false إذا أردت إخفاء البحث والفلترة ليظهر العمود فقط مثل الصورة تمامًا
@@ -735,7 +860,9 @@
 
     /**
      * قائمة الأقسام:
-     * - خاصية icon تقبل: "folder" (مجلد أرشيف رئيسي) | "book" (كتاب) | "channel" (قناة) | "group" (مجموعة) | "bot" (بوت) | "contact" (تواصل) | "star" (مميز)
+     * - خاصية icon تقبل: "folder" | "book" | "channel" | "group" | "bot" | "contact" | "star"
+     * - خاصية badge تقبل اختياريًا: "new" (جديد أخضر) | "hot" (حصري أحمر) | "pinned" (مثبت ذهبي)
+     * - خاصية badgeText: النص المكتوب داخل الشارة (مثلاً: "جديد 🟢" أو "مثبت 📌")
      */
     const SECTIONS_DATA = [
       {
@@ -744,6 +871,8 @@
         numberOrSub: "العام",
         category: "أرشيف",
         icon: "folder",
+        badge: "pinned",
+        badgeText: "📌 مثبت",
         wide: true,
         url: "https://t.me/b_borx34bot"
       },
@@ -777,6 +906,8 @@
         numberOrSub: "4",
         category: "أرشيف",
         icon: "book",
+        badge: "new",
+        badgeText: "🏴 جديد",
         url: "https://t.me/b_borx34bot"
       },
       {
@@ -785,6 +916,8 @@
         numberOrSub: "13",
         category: "أرشيف",
         icon: "book",
+        badge: "hot",
+        badgeText: "🔥 مميز",
         url: "https://t.me/b_borx34bot"
       },
       {
@@ -1115,6 +1248,9 @@
         .map(
           (item, idx) => {
             const isFav = favs.includes(Number(item.id));
+            const badgeHtml = item.badge && item.badgeText 
+              ? `<span class="section-badge badge-${item.badge}">${item.badgeText}</span>` 
+              : "";
             return `
             <div class="section-tile ${item.wide ? "wide-card-tile" : ""}" role="button" tabindex="0" data-index="${idx}">
               <button 
@@ -1125,6 +1261,7 @@
               >
                 ${isFav ? "★" : "☆"}
               </button>
+              ${badgeHtml}
               ${getSectionIcon(item)}
               <div class="tile-text-wrap">
                 <div class="tile-title">${item.title}</div>
@@ -1512,6 +1649,29 @@
           });
         }
 
+        // التحكم بزر إخفاء/إظهار أدوات البحث والتصنيفات (الميزة رقم 4)
+        const toggleHeaderBtn = document.getElementById("toggle-header-btn");
+        const topBarEl = document.getElementById("top-bar");
+        const toggleHeaderIcon = document.getElementById("toggle-header-icon");
+        const toggleHeaderText = document.getElementById("toggle-header-text");
+        let isHeaderVisible = true;
+
+        if (toggleHeaderBtn && topBarEl) {
+          toggleHeaderBtn.addEventListener("click", () => {
+            triggerHaptic();
+            isHeaderVisible = !isHeaderVisible;
+            if (isHeaderVisible) {
+              topBarEl.style.display = "block";
+              toggleHeaderIcon.textContent = "🔽";
+              toggleHeaderText.textContent = "إخفاء أدوات البحث والفلترة";
+            } else {
+              topBarEl.style.display = "none";
+              toggleHeaderIcon.textContent = "🔍";
+              toggleHeaderText.textContent = "إظهار أدوات البحث والفلترة";
+            }
+          });
+        }
+
         applyLayoutMode();
       } catch (e) {
         console.warn("UI setup error:", e);
@@ -1530,6 +1690,14 @@
       } catch (e) {
         console.error("Sections rendering error:", e);
       }
+
+      // إخفاء شاشة التحميل الافتتاحية بعد اكتمال الصفحة (الميزة رقم 3)
+      setTimeout(() => {
+        const splash = document.getElementById("splash-screen");
+        if (splash) {
+          splash.classList.add("fade-out");
+        }
+      }, 450);
     }
 
     // التبديل بين العملات في خانة التبرع المدمجة
