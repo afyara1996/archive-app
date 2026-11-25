@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:42:50Z"
+    "updatedAt": "2026-11-25T19:42:53Z"
   },
   "sections": [
     {
@@ -134,6 +134,17 @@
       "url": "https://t.me/admirow"
     },
     {
+      "id": 12,
+      "title": "تجريبي",
+      "numberOrSub": "",
+      "category": "عام",
+      "icon": "star",
+      "wide": true,
+      "url": "https://t.me/M2B_MBA3",
+      "category_en": "General",
+      "category_tr": "Genel"
+    },
+    {
       "id": 9,
       "title": "بوت",
       "title_en": "Bot",
@@ -147,17 +158,6 @@
       "icon": "bot",
       "wide": true,
       "url": "https://t.me/b_borx34bot"
-    },
-    {
-      "id": 12,
-      "title": "تجريبي",
-      "numberOrSub": "",
-      "category": "عام",
-      "icon": "star",
-      "wide": true,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "General",
-      "category_tr": "Genel"
     },
     {
       "id": 10,
