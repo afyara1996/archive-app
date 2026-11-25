@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:42:31Z"
+    "updatedAt": "2026-11-25T19:42:45Z"
   },
   "sections": [
     {
@@ -164,6 +164,17 @@
       "url": "https://t.me/admirow"
     },
     {
+      "id": 12,
+      "title": "تجريبي",
+      "numberOrSub": "",
+      "category": "عام",
+      "icon": "star",
+      "wide": true,
+      "url": "https://t.me/M2B_MBA3",
+      "category_en": "General",
+      "category_tr": "Genel"
+    },
+    {
       "id": 11,
       "title": "دليل",
       "title_en": "Guide",
@@ -183,17 +194,6 @@
       "content": "أهلاً بك في دليل الاستخدام السريع للأرشيف:\n\n• يمكنك البحث مباشرة عن أي قسم أو رقم أرشيف من خانة البحث بالأعلى.\n• اضغط على النجمة (☆) بجانب أي قسم لإضافته إلى قائمة المفضلة للوصول السريع.\n• يمكنك تغيير شكل الخلفية من زر (✨) وتبديل طريقة عرض الأزرار من زر (📐).\n• جميع الأقسام المرتبطة بمحتوى داخلي تفتح هنا مباشرة لسرعة القراءة دون مغادرة التطبيق.",
       "content_en": "Welcome to Quick Archive Guide:\n\n• Search any section or archive number directly from the top search bar.\n• Tap the star (☆) next to any section to add it to favorites.\n• Customize your background theme (✨) and layout style (📐) from the top bar.\n• Internal content sections open instantly inside the app without leaving Telegram.",
       "content_tr": "Hızlı Arşiv Rehberine Hoş Geldiniz:\n\n• Üst arama çubuğundan herhangi bir bölüm veya arşiv numarasını arayabilirsiniz.\n• Hızlı erişim için bölümlerin yanındaki yıldız (☆) simgesine dokunarak favorilere ekleyin.\n• Üstteki düğmelerden arka plan temasını (✨) ve düzeni (📐) değiştirebilirsiniz.\n• İçerik bölümleri Telegram'dan ayrılmadan uygulama içinde anında açılır."
-    },
-    {
-      "id": 12,
-      "title": "تجريبي",
-      "numberOrSub": "",
-      "category": "عام",
-      "icon": "star",
-      "wide": true,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "General",
-      "category_tr": "Genel"
     }
   ]
 }
