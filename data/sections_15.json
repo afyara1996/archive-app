@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:26:26Z"
+    "updatedAt": "2026-11-25T19:26:30Z"
   },
   "sections": [
     {
@@ -86,6 +86,17 @@
       "url": "https://t.me/b_borx34bot"
     },
     {
+      "id": 12,
+      "title": "الأرشيف الجامع",
+      "numberOrSub": "",
+      "category": "أرشيف",
+      "icon": "book",
+      "wide": true,
+      "url": "https://t.me/M2B_MBA3",
+      "category_en": "Archive",
+      "category_tr": "Arşiv"
+    },
+    {
       "id": 6,
       "title": "الأرشيف",
       "title_en": "Archive",
@@ -102,17 +113,6 @@
       "badgeText_en": "🔥 Featured",
       "badgeText_tr": "🔥 Öne Çıkan",
       "url": "https://t.me/b_borx34bot"
-    },
-    {
-      "id": 12,
-      "title": "الأرشيف الجامع",
-      "numberOrSub": "",
-      "category": "أرشيف",
-      "icon": "book",
-      "wide": true,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "Archive",
-      "category_tr": "Arşiv"
     },
     {
       "id": 7,
