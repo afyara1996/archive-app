@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:42:53Z"
+    "updatedAt": "2026-11-25T19:42:58Z"
   },
   "sections": [
     {
@@ -119,6 +119,17 @@
       "url": "https://t.me/admirow"
     },
     {
+      "id": 12,
+      "title": "تجريبي",
+      "numberOrSub": "",
+      "category": "عام",
+      "icon": "star",
+      "wide": true,
+      "url": "https://t.me/M2B_MBA3",
+      "category_en": "General",
+      "category_tr": "Genel"
+    },
+    {
       "id": 8,
       "title": "مجموعة",
       "title_en": "Group",
@@ -132,17 +143,6 @@
       "icon": "group",
       "wide": true,
       "url": "https://t.me/admirow"
-    },
-    {
-      "id": 12,
-      "title": "تجريبي",
-      "numberOrSub": "",
-      "category": "عام",
-      "icon": "star",
-      "wide": true,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "General",
-      "category_tr": "Genel"
     },
     {
       "id": 9,
