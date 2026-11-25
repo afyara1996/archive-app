@@ -1130,7 +1130,11 @@
       // اجعل showHeaderControls: false إذا أردت إخفاء البحث والفلترة ليظهر العمود فقط مثل الصورة تمامًا
       showHeaderControls: true,
       // إذا أردت لاحقًا جلب الأقسام من API أو Firebase ضع الرابط هنا:
-      apiEndpoint: ""
+      apiEndpoint: "",
+      // إعدادات GitHub لتحميل الأقسام الديناميكية فورياً بدون كاش ودعم تعدد بوتات الثقات (?bot=ID)
+      githubRepo: "afyara1996/archive-app",
+      githubBranch: "main",
+      customAnnouncementText: ""
     };
 
     /**
@@ -1583,16 +1587,90 @@
     }
 
     // =========================================================================
-    // 2. طبقة جلب البيانات (DataService) لسهولة الربط مع API أو Firebase
+    // 2. طبقة جلب البيانات (DataService) — تحميل فوري من GitHub بدون كاش + تعدد البوتات
     // =========================================================================
     const DataService = {
-      async getSections() {
-        if (CONFIG.apiEndpoint) {
-          const response = await fetch(CONFIG.apiEndpoint);
-          if (!response.ok) throw new Error("فشل تحميل البيانات");
-          return await response.json();
+      getRequestedBotId() {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const raw = (params.get("bot") || "").trim();
+          return /^\d+$/.test(raw) ? raw : "";
+        } catch (e) {
+          return "";
         }
-        return Promise.resolve(SECTIONS_DATA);
+      },
+
+      async fetchJsonFresh(url, timeoutMs = 6000) {
+        const sep = url.includes("?") ? "&" : "?";
+        const bustUrl = `${url}${sep}t=${Date.now()}`;
+        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        try {
+          const response = await fetch(bustUrl, {
+            cache: "no-store",
+            signal: controller ? controller.signal : undefined
+          });
+          if (!response.ok) return null;
+          return await response.json();
+        } catch (e) {
+          return null;
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
+      },
+
+      applyMeta(meta) {
+        if (!meta || typeof meta !== "object") return;
+        if (meta.botUsername) {
+          CONFIG.botUsername = meta.botUsername;
+          const footerEl = document.getElementById("bot-footer");
+          if (footerEl) footerEl.textContent = meta.botUsername;
+        }
+        if (meta.botUrl) {
+          CONFIG.botUrl = meta.botUrl;
+        }
+        if (typeof meta.announcementText === "string" && meta.announcementText.trim()) {
+          CONFIG.customAnnouncementText = meta.announcementText.trim();
+          const announcementTextEl = document.getElementById("announcement-text");
+          if (announcementTextEl) announcementTextEl.textContent = CONFIG.customAnnouncementText;
+        }
+      },
+
+      extractPayload(data) {
+        if (Array.isArray(data)) {
+          return data;
+        }
+        if (data && typeof data === "object" && Array.isArray(data.sections)) {
+          this.applyMeta(data.meta);
+          return data.sections;
+        }
+        return null;
+      },
+
+      async getSections() {
+        const botId = this.getRequestedBotId();
+        const relPath = botId ? `data/sections_${botId}.json` : "data/sections.json";
+        const candidates = [];
+
+        if (CONFIG.apiEndpoint) {
+          candidates.push(CONFIG.apiEndpoint);
+        }
+        if (CONFIG.githubRepo) {
+          const branch = CONFIG.githubBranch || "main";
+          // raw.githubusercontent.com يحدّث خلال ثوانٍ بدون انتظار بناء GitHub Pages
+          candidates.push(`https://raw.githubusercontent.com/${CONFIG.githubRepo}/${branch}/${relPath}`);
+        }
+        candidates.push(`./${relPath}`);
+
+        for (const candidateUrl of candidates) {
+          const data = await this.fetchJsonFresh(candidateUrl);
+          const sections = this.extractPayload(data);
+          if (sections !== null) {
+            return sections;
+          }
+        }
+        // نسخة احتياطية مدمجة لضمان ألا تفتح المدونة فارغة أبداً
+        return SECTIONS_DATA;
       }
     };
 
@@ -1648,8 +1726,8 @@
     
     function getLocalized(item, prop) {
       if (!item) return "";
-      if (currentLang === "en" && item[prop + "_en"] !== undefined) return item[prop + "_en"];
-      if (currentLang === "tr" && item[prop + "_tr"] !== undefined) return item[prop + "_tr"];
+      if (currentLang === "en" && item[prop + "_en"] !== undefined && item[prop + "_en"] !== "") return item[prop + "_en"];
+      if (currentLang === "tr" && item[prop + "_tr"] !== undefined && item[prop + "_tr"] !== "") return item[prop + "_tr"];
       return item[prop] || "";
     }
 
@@ -1663,10 +1741,15 @@
     const searchBoxEl = document.getElementById("search-box");
     const searchInputEl = document.getElementById("search-input");
 
-    // نظام حفظ المفضلة في ذاكرة المتصفح (LocalStorage)
+    // نظام حفظ المفضلة في ذاكرة المتصفح (معزول لكل بوت مدونة مستقل)
+    function getFavoritesStorageKey() {
+      const bid = DataService.getRequestedBotId();
+      return bid ? `tg_blog_favorites_${bid}` : "tg_blog_favorites";
+    }
+
     function getFavorites() {
       try {
-        return JSON.parse(localStorage.getItem("tg_blog_favorites") || "[]");
+        return JSON.parse(localStorage.getItem(getFavoritesStorageKey()) || "[]");
       } catch {
         return [];
       }
@@ -1683,7 +1766,7 @@
         favs.push(numId);
       }
       try {
-        localStorage.setItem("tg_blog_favorites", JSON.stringify(favs));
+        localStorage.setItem(getFavoritesStorageKey(), JSON.stringify(favs));
       } catch {}
       renderSections();
       renderFilterChips();
@@ -2225,7 +2308,9 @@
       const announcementBadge = document.querySelector(".announcement-badge");
       if (announcementBadge) announcementBadge.textContent = config.announcementNew;
       const announcementText = document.getElementById("announcement-text");
-      if (announcementText) announcementText.textContent = config.announcementText;
+      if (announcementText) {
+        announcementText.textContent = CONFIG.customAnnouncementText || config.announcementText;
+      }
 
       // أزرار التحكم
       const toggleHeaderText = document.getElementById("toggle-header-text");
