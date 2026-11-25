@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:45:30Z"
+    "updatedAt": "2026-11-25T19:45:52Z"
   },
   "sections": [
     {
@@ -131,7 +131,8 @@
       "badge": "pinned",
       "badgeText": "📌 مثبت",
       "badgeText_en": "📌 Pinned",
-      "badgeText_tr": "📌 Sabit"
+      "badgeText_tr": "📌 Sabit",
+      "title_tr": "aras"
     },
     {
       "id": 8,
