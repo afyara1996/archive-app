@@ -3,24 +3,9 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:26:57Z"
+    "updatedAt": "2026-11-25T19:27:48Z"
   },
   "sections": [
-    {
-      "id": 12,
-      "title": "الأرشيف الجامع",
-      "numberOrSub": "",
-      "category": "أرشيف",
-      "icon": "book",
-      "wide": false,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "Archive",
-      "category_tr": "Arşiv",
-      "badge": "pinned",
-      "badgeText": "📌 مثبت",
-      "badgeText_en": "📌 Pinned",
-      "badgeText_tr": "📌 Sabit"
-    },
     {
       "id": 1,
       "title": "الأرشيف",
