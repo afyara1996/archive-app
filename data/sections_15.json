@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:26:43Z"
+    "updatedAt": "2026-11-25T19:26:52Z"
   },
   "sections": [
     {
@@ -12,7 +12,7 @@
       "numberOrSub": "",
       "category": "أرشيف",
       "icon": "book",
-      "wide": true,
+      "wide": false,
       "url": "https://t.me/M2B_MBA3",
       "category_en": "Archive",
       "category_tr": "Arşiv"
