@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:43:49Z"
+    "updatedAt": "2026-11-25T19:43:53Z"
   },
   "sections": [
     {
@@ -127,7 +127,11 @@
       "wide": true,
       "url": "https://t.me/M2B_MBA3",
       "category_en": "General",
-      "category_tr": "Genel"
+      "category_tr": "Genel",
+      "badge": "pinned",
+      "badgeText": "📌 مثبت",
+      "badgeText_en": "📌 Pinned",
+      "badgeText_tr": "📌 Sabit"
     },
     {
       "id": 8,
