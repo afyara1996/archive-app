@@ -1587,7 +1587,7 @@
     }
 
     // =========================================================================
-    // 2. طبقة جلب البيانات (DataService) — تحميل فوري من GitHub بدون كاش + تعدد البوتات
+    // 2. طبقة جلب البيانات (DataService) — تحميل فوري بدون كاش 5 دقائق + تعدد البوتات
     // =========================================================================
     const DataService = {
       getRequestedBotId() {
@@ -1595,6 +1595,16 @@
           const params = new URLSearchParams(window.location.search);
           const raw = (params.get("bot") || "").trim();
           return /^\d+$/.test(raw) ? raw : "";
+        } catch (e) {
+          return "";
+        }
+      },
+
+      getRequestedVersion() {
+        try {
+          const params = new URLSearchParams(window.location.search);
+          const raw = (params.get("v") || "").trim();
+          return /^[a-fA-F0-9]{7,40}$/.test(raw) ? raw : "";
         } catch (e) {
           return "";
         }
@@ -1616,6 +1626,52 @@
           return null;
         } finally {
           if (timer) clearTimeout(timer);
+        }
+      },
+
+      decodeGitHubBase64Json(b64Content) {
+        try {
+          const clean = (b64Content || "").replace(/\s+/g, "");
+          const binary = atob(clean);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          const text = new TextDecoder("utf-8").decode(bytes);
+          return JSON.parse(text);
+        } catch (e) {
+          return null;
+        }
+      },
+
+      async fetchViaGitHubApi(repo, branch, relPath, timeoutMs = 6000) {
+        const url = `https://api.github.com/repos/${repo}/contents/${relPath}?ref=${encodeURIComponent(branch)}`;
+        const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+        const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
+        try {
+          const response = await fetch(url, {
+            cache: "no-store",
+            signal: controller ? controller.signal : undefined
+          });
+          if (!response.ok) return null;
+          const payload = await response.json();
+          if (payload && typeof payload.content === "string") {
+            return this.decodeGitHubBase64Json(payload.content);
+          }
+          return null;
+        } catch (e) {
+          return null;
+        } finally {
+          if (timer) clearTimeout(timer);
+        }
+      },
+
+      getUpdatedTimestamp(data) {
+        try {
+          const ts = data && data.meta && data.meta.updatedAt ? Date.parse(data.meta.updatedAt) : 0;
+          return Number.isFinite(ts) ? ts : 0;
+        } catch (e) {
+          return 0;
         }
       },
 
@@ -1649,26 +1705,40 @@
 
       async getSections() {
         const botId = this.getRequestedBotId();
+        const verSha = this.getRequestedVersion();
         const relPath = botId ? `data/sections_${botId}.json` : "data/sections.json";
-        const candidates = [];
 
         if (CONFIG.apiEndpoint) {
-          candidates.push(CONFIG.apiEndpoint);
+          const customData = await this.fetchJsonFresh(CONFIG.apiEndpoint);
+          const customSections = this.extractPayload(customData);
+          if (customSections !== null) return customSections;
         }
+
         if (CONFIG.githubRepo) {
           const branch = CONFIG.githubBranch || "main";
-          // raw.githubusercontent.com يحدّث خلال ثوانٍ بدون انتظار بناء GitHub Pages
-          candidates.push(`https://raw.githubusercontent.com/${CONFIG.githubRepo}/${branch}/${relPath}`);
-        }
-        candidates.push(`./${relPath}`);
-
-        for (const candidateUrl of candidates) {
-          const data = await this.fetchJsonFresh(candidateUrl);
-          const sections = this.extractPayload(data);
-          if (sections !== null) {
-            return sections;
+          // نجلب بالتوازي: (1) رابط Commit SHA الفوري بدون كاش 0.2ث، و(2) GitHub API الحقيقي
+          // ثم نختار النسخة الأحدث حسب updatedAt تلقائياً!
+          const tasks = [this.fetchViaGitHubApi(CONFIG.githubRepo, branch, relPath)];
+          if (verSha) {
+            tasks.push(this.fetchJsonFresh(`https://raw.githubusercontent.com/${CONFIG.githubRepo}/${verSha}/${relPath}`));
           }
+          const results = (await Promise.all(tasks)).filter(Boolean);
+          if (results.length > 0) {
+            results.sort((a, b) => this.getUpdatedTimestamp(b) - this.getUpdatedTimestamp(a));
+            const best = this.extractPayload(results[0]);
+            if (best !== null) return best;
+          }
+
+          // بديل احتياطي عبر raw main
+          const rawData = await this.fetchJsonFresh(`https://raw.githubusercontent.com/${CONFIG.githubRepo}/${branch}/${relPath}`);
+          const rawSections = this.extractPayload(rawData);
+          if (rawSections !== null) return rawSections;
         }
+
+        const localData = await this.fetchJsonFresh(`./${relPath}`);
+        const localSections = this.extractPayload(localData);
+        if (localSections !== null) return localSections;
+
         // نسخة احتياطية مدمجة لضمان ألا تفتح المدونة فارغة أبداً
         return SECTIONS_DATA;
       }
