@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:44:09Z"
+    "updatedAt": "2026-11-25T19:44:50Z"
   },
   "sections": [
     {
@@ -121,7 +121,7 @@
     {
       "id": 12,
       "title": "تجريبي",
-      "numberOrSub": "",
+      "numberOrSub": "مرحبا بكم في الفرع",
       "category": "أرشيف",
       "icon": "book",
       "wide": true,
