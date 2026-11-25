@@ -3,7 +3,7 @@
     "botUsername": "@bo_sdvbot",
     "botUrl": "https://t.me/bo_sdvbot",
     "announcementText": "",
-    "updatedAt": "2026-11-25T19:25:11Z"
+    "updatedAt": "2026-11-25T19:25:14Z"
   },
   "sections": [
     {
@@ -119,6 +119,17 @@
       "url": "https://t.me/admirow"
     },
     {
+      "id": 12,
+      "title": "الأرشيف الجامع",
+      "numberOrSub": "",
+      "category": "أرشيف",
+      "icon": "book",
+      "wide": true,
+      "url": "https://t.me/M2B_MBA3",
+      "category_en": "Archive",
+      "category_tr": "Arşiv"
+    },
+    {
       "id": 8,
       "title": "مجموعة",
       "title_en": "Group",
@@ -132,17 +143,6 @@
       "icon": "group",
       "wide": true,
       "url": "https://t.me/admirow"
-    },
-    {
-      "id": 12,
-      "title": "الأرشيف الجامع",
-      "numberOrSub": "",
-      "category": "أرشيف",
-      "icon": "book",
-      "wide": true,
-      "url": "https://t.me/M2B_MBA3",
-      "category_en": "Archive",
-      "category_tr": "Arşiv"
     },
     {
       "id": 9,
