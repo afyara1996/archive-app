@@ -1690,6 +1690,38 @@
           const announcementTextEl = document.getElementById("announcement-text");
           if (announcementTextEl) announcementTextEl.textContent = CONFIG.customAnnouncementText;
         }
+        if (meta.donation && typeof meta.donation === "object") {
+          const don = meta.donation;
+          const sectionEl = document.getElementById("donation-section");
+          const coins = ["ton", "usdt", "btc", "eth"];
+          let firstAvailable = null;
+
+          coins.forEach(coin => {
+            const addr = typeof don[coin] === "string" ? don[coin].trim() : "";
+            const addrEl = document.getElementById("addr-" + coin);
+            if (addrEl) addrEl.textContent = addr;
+            const tabBtn = document.querySelector(`.crypto-tab-btn[onclick*="'${coin}'"]`);
+            if (tabBtn) {
+              tabBtn.style.display = addr ? "" : "none";
+              tabBtn.classList.remove("active");
+            }
+            if (addr && !firstAvailable) {
+              firstAvailable = { coin, addr, tabBtn };
+            }
+          });
+
+          if (sectionEl) {
+            if (don.enabled && firstAvailable) {
+              sectionEl.style.display = "block";
+              currentCrypto = firstAvailable.coin;
+              if (firstAvailable.tabBtn) firstAvailable.tabBtn.classList.add("active");
+              const activeEl = document.getElementById("active-crypto-address");
+              if (activeEl) activeEl.textContent = firstAvailable.addr;
+            } else {
+              sectionEl.style.display = "none";
+            }
+          }
+        }
       },
 
       extractPayload(data) {
@@ -2608,7 +2640,8 @@
       triggerHaptic();
       currentCrypto = coin;
       document.querySelectorAll(".crypto-tab-btn").forEach(btn => btn.classList.remove("active"));
-      event.target.classList.add("active");
+      const activeBtn = document.querySelector(`.crypto-tab-btn[onclick*="'${coin}'"]`);
+      if (activeBtn) activeBtn.classList.add("active");
       const targetAddr = document.getElementById("addr-" + coin)?.innerText || "";
       document.getElementById("active-crypto-address").innerText = targetAddr;
     }
